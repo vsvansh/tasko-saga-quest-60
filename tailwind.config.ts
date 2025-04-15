@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom anime theme colors
+				anime: {
+					primary: '#8B5CF6', // Main purple
+					secondary: '#D946EF', // Pink
+					blue: '#0EA5E9', // Blue
+					red: '#EF4444', // High priority
+					yellow: '#F59E0B', // Medium priority
+					green: '#10B981', // Low priority
+					lightPurple: '#E5DEFF', // Light purple for backgrounds
+					lightPink: '#FFDEE2', // Light pink for accents
+					darkPurple: '#6E59A5', // Darker purple
 				}
 			},
 			borderRadius: {
@@ -84,11 +97,42 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'task-complete': {
+					'0%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.05)' },
+					'100%': { transform: 'scale(1)' }
+				},
+				'bounce-in': {
+					'0%': { transform: 'scale(0.8)', opacity: '0' },
+					'70%': { transform: 'scale(1.05)', opacity: '1' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
+				},
+				'slide-up': {
+					'0%': { transform: 'translateY(20px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
+				},
+				'wiggle': {
+					'0%, 100%': { transform: 'rotate(-2deg)' },
+					'50%': { transform: 'rotate(2deg)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'task-complete': 'task-complete 0.5s ease-in-out',
+				'bounce-in': 'bounce-in 0.5s ease-out',
+				'slide-up': 'slide-up 0.3s ease-out',
+				'float': 'float 3s ease-in-out infinite',
+				'wiggle': 'wiggle 2s ease-in-out infinite'
+			},
+			fontFamily: {
+				'anime': ['Quicksand', 'sans-serif'],
+				'anime-title': ['"Varela Round"', 'sans-serif']
 			}
 		}
 	},
