@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import { Category } from '@/types';
@@ -11,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { getCategoryColor } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SidebarProps {
   onAddCategory: () => void;
@@ -34,7 +34,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
     const [reorderedCategory] = newCategories.splice(source.index, 1);
     newCategories.splice(destination.index, 0, reorderedCategory);
 
-    // Update order property
     const updatedCategories = newCategories.map((category, index) => ({
       ...category,
       order: index,
@@ -61,17 +60,25 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
 
   return (
     <>
-      {/* Mobile menu toggle */}
-      {isMobile && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="fixed top-4 left-4 z-50"
-          onClick={toggleSidebar}
-        >
-          <Menu size={24} />
-        </Button>
-      )}
+      {/* Mobile menu toggle - always visible */}
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="fixed top-4 left-4 z-50 lg:hidden"
+        onClick={toggleSidebar}
+      >
+        <Menu size={24} />
+      </Button>
+
+      {/* Desktop toggle - only visible on larger screens */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="fixed bottom-4 left-4 z-50 hidden lg:flex"
+        onClick={toggleSidebar}
+      >
+        {sidebarOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
+      </Button>
 
       <AnimatePresence>
         {sidebarOpen && (

@@ -1,17 +1,29 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Task } from '@/types';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn, getPriorityColor } from '@/lib/utils';
-import { format, isSameDay } from 'date-fns';
+import { format, isSameDay, addMonths, subMonths, startOfMonth } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { 
+  Calendar, Clock, ChevronLeft, ChevronRight, 
+  ChevronsLeft, ChevronsRight, CalendarRange,
+  ArrowUpDown, List, Grid
+} from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 const CalendarView: React.FC = () => {
   const { state } = useTodo();
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [jumpDate, setJumpDate] = useState('');
+  const [showJumpDatePopover, setShowJumpDatePopover] = useState(false);
+  const [displayMode, setDisplayMode] = useState<'list' | 'grid'>('list');
   
   // Function to get tasks for a specific date
   const getTasksForDate = (date: Date): Task[] => {
@@ -24,7 +36,119 @@ const CalendarView: React.FC = () => {
   const tasksForSelectedDate = selectedDate 
     ? getTasksForDate(selectedDate) 
     : [];
-  
+
+  const handleJumpToDate = () => {
+    const date = new Date(jumpDate);
+    if (isNaN(date.getTime())) {
+      toast({
+        title: "Invalid date",
+        description: "Please enter a valid date",
+        variant: "destructive"
+      });
+      return;
+    }
+    setSelectedDate(date);
+    setCurrentMonth(date);
+    setShowJumpDatePopover(false);
+    toast({
+      title: "Date selected",
+      description: `Jumped to ${format(date, 'PPP')}`
+    });
+  };
+
+  const navigationButtons = (
+    <div className="flex items-center gap-2 mb-4">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setCurrentMonth(prev => startOfMonth(subMonths(prev, 12)))}
+      >
+        <ChevronsLeft className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => setCurrentMonth(new Date())}
+      >
+        Today
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setCurrentMonth(prev => startOfMonth(addMonths(prev, 12)))}
+      >
+        <ChevronsRight className="h-4 w-4" />
+      </Button>
+      
+      <Popover open={showJumpDatePopover} onOpenChange={setShowJumpDatePopover}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="ml-2">
+            <CalendarRange className="mr-2 h-4 w-4" />
+            Jump to Date
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80">
+          <div className="flex flex-col gap-2">
+            <Input
+              type="date"
+              value={jumpDate}
+              onChange={(e) => setJumpDate(e.target.value)}
+              className="w-full"
+            />
+            <Button onClick={handleJumpToDate}>Go to Date</Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      <div className="ml-auto flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setViewMode('month')}
+          className={cn(viewMode === 'month' && "bg-primary text-primary-foreground")}
+        >
+          Month
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setViewMode('week')}
+          className={cn(viewMode === 'week' && "bg-primary text-primary-foreground")}
+        >
+          Week
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setViewMode('day')}
+          className={cn(viewMode === 'day' && "bg-primary text-primary-foreground")}
+        >
+          Day
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setDisplayMode(prev => prev === 'list' ? 'grid' : 'list')}
+        >
+          {displayMode === 'list' ? <Grid className="h-4 w-4" /> : <List className="h-4 w-4" />}
+        </Button>
+      </div>
+    </div>
+  );
+
   // Function to generate a class name for days with tasks
   const getDayClassName = (date: Date) => {
     const tasks = getTasksForDate(date);
@@ -50,11 +174,13 @@ const CalendarView: React.FC = () => {
       <div className="md:col-span-2">
         <Card>
           <CardContent className="p-4">
+            {navigationButtons}
             <CalendarComponent
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
               className="mx-auto"
+              month={currentMonth}
               modifiersClassNames={{
                 selected: "bg-primary text-primary-foreground",
               }}
@@ -94,14 +220,12 @@ const CalendarView: React.FC = () => {
       
       <div>
         <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
+            </CardTitle>
+          </CardHeader>
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-medium">
-                {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
-              </h2>
-            </div>
-            
             {tasksForSelectedDate.length > 0 ? (
               <div className="space-y-3">
                 {tasksForSelectedDate.map(task => (

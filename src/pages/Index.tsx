@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import Sidebar from '@/components/Sidebar';
