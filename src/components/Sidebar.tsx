@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { useTodo } from '@/context/TodoContext';
-import { Category } from '@/types';
+import { Category, Task } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Trash2, Plus, XCircle, Menu, ListFilter, CheckCircle, Circle, Star, Settings, Clock } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,6 +12,15 @@ import { getCategoryColor } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
 
 interface SidebarProps {
   onAddCategory: () => void;
@@ -22,6 +32,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
   const [isHovering, setIsHovering] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showStarredTasks, setShowStarredTasks] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source } = result;
@@ -44,6 +57,23 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleStarredClick = () => {
+    setShowStarredTasks(true);
+    setFilter('all');
+    toast({
+      title: "Starred tasks",
+      description: "Showing your starred tasks"
+    });
+  };
+
+  const handleNotificationsClick = () => {
+    setShowNotifications(true);
+  };
+
+  const handleSettingsClick = () => {
+    setShowSettings(true);
   };
 
   const totalTasks = state.tasks.length;
@@ -147,6 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
                   <Button
                     variant="ghost"
                     className="w-full justify-start font-medium"
+                    onClick={handleStarredClick}
                   >
                     <Star className="mr-2 h-4 w-4 text-anime-yellow" />
                     Starred
@@ -156,6 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
                   <Button
                     variant="ghost"
                     className="w-full justify-start font-medium"
+                    onClick={handleNotificationsClick}
                   >
                     <Clock className="mr-2 h-4 w-4 text-anime-blue" />
                     Due Soon
@@ -269,10 +301,156 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
                 <Plus size={16} />
                 Add Category
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full mt-2 flex items-center gap-2 text-muted-foreground"
+                onClick={handleSettingsClick}
+              >
+                <Settings size={14} />
+                Settings
+              </Button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Settings</DialogTitle>
+            <DialogDescription>
+              Configure your TaskAnime application preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <span>Dark Mode</span>
+              <Button variant="outline" size="sm" onClick={() => {
+                toast({
+                  title: "Theme changed",
+                  description: "Theme preference has been saved"
+                });
+              }}>
+                Toggle
+              </Button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Notifications</span>
+              <Button variant="outline" size="sm" onClick={() => {
+                toast({
+                  title: "Notifications enabled",
+                  description: "You will now receive notifications"
+                });
+              }}>
+                Enable
+              </Button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Export Data</span>
+              <Button variant="outline" size="sm" onClick={() => {
+                toast({
+                  title: "Data exported",
+                  description: "Your data has been exported successfully"
+                });
+              }}>
+                Export
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowSettings(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Starred Tasks Dialog */}
+      <Dialog open={showStarredTasks} onOpenChange={setShowStarredTasks}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Starred Tasks</DialogTitle>
+            <DialogDescription>
+              Your important tasks
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {state.tasks.filter(task => task.starred).length > 0 ? (
+              <div className="space-y-2">
+                {state.tasks.filter(task => task.starred).map(task => (
+                  <div key={task.id} className="p-3 border rounded-md">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{task.title}</h4>
+                        {task.description && (
+                          <p className="text-sm text-muted-foreground">{task.description}</p>
+                        )}
+                      </div>
+                      <Star className="h-4 w-4 text-anime-yellow fill-anime-yellow" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Star className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-20" />
+                <p>You don't have any starred tasks yet</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowStarredTasks(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Due Soon</DialogTitle>
+            <DialogDescription>
+              Tasks that are due in the next 3 days
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {dueSoonTasks > 0 ? (
+              <div className="space-y-2">
+                {state.tasks.filter(task => {
+                  if (!task.dueDate) return false;
+                  const dueDate = new Date(task.dueDate);
+                  const today = new Date();
+                  const diffTime = dueDate.getTime() - today.getTime();
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  return diffDays <= 3 && diffDays >= 0 && !task.completed;
+                }).map(task => (
+                  <div key={task.id} className="p-3 border rounded-md">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{task.title}</h4>
+                        {task.description && (
+                          <p className="text-sm text-muted-foreground">{task.description}</p>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Due: {new Date(task.dueDate!).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-20" />
+                <p>No tasks due soon</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowNotifications(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

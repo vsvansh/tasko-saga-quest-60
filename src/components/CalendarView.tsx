@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Task } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn, getPriorityColor } from '@/lib/utils';
-import { format, isSameDay, addMonths, subMonths, startOfMonth } from 'date-fns';
+import { format, isSameDay, addMonths, subMonths, startOfMonth, startOfWeek, isSameMonth } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,9 +13,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { 
   Calendar, Clock, ChevronLeft, ChevronRight, 
   ChevronsLeft, ChevronsRight, CalendarRange,
-  ArrowUpDown, List, Grid
+  ArrowUpDown, List, Grid, Settings,
+  Sun, Moon, Monitor
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import CalendarViewEnhancements, { WeekView, DayView, GridView } from './CalendarViewEnhancements';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const CalendarView: React.FC = () => {
   const { state } = useTodo();
@@ -24,6 +28,7 @@ const CalendarView: React.FC = () => {
   const [jumpDate, setJumpDate] = useState('');
   const [showJumpDatePopover, setShowJumpDatePopover] = useState(false);
   const [displayMode, setDisplayMode] = useState<'list' | 'grid'>('list');
+  const [appearance, setAppearance] = useState<'light' | 'dark' | 'system'>('system');
   
   // Function to get tasks for a specific date
   const getTasksForDate = (date: Date): Task[] => {
@@ -53,6 +58,16 @@ const CalendarView: React.FC = () => {
     toast({
       title: "Date selected",
       description: `Jumped to ${format(date, 'PPP')}`
+    });
+  };
+
+  const handleAppearanceChange = (mode: 'light' | 'dark' | 'system') => {
+    setAppearance(mode);
+    
+    // This is just for demo purposes - in a real app, you would use a theme provider
+    toast({
+      title: "Appearance changed",
+      description: `Calendar view set to ${mode} mode`
     });
   };
 
@@ -114,37 +129,37 @@ const CalendarView: React.FC = () => {
       </Popover>
 
       <div className="ml-auto flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setViewMode('month')}
-          className={cn(viewMode === 'month' && "bg-primary text-primary-foreground")}
-        >
-          Month
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setViewMode('week')}
-          className={cn(viewMode === 'week' && "bg-primary text-primary-foreground")}
-        >
-          Week
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setViewMode('day')}
-          className={cn(viewMode === 'day' && "bg-primary text-primary-foreground")}
-        >
-          Day
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setDisplayMode(prev => prev === 'list' ? 'grid' : 'list')}
-        >
-          {displayMode === 'list' ? <Grid className="h-4 w-4" /> : <List className="h-4 w-4" />}
-        </Button>
+        <CalendarViewEnhancements
+          viewMode={viewMode}
+          displayMode={displayMode}
+          selectedDate={selectedDate}
+          currentMonth={currentMonth}
+          onViewModeChange={setViewMode}
+          onDisplayModeChange={setDisplayMode}
+          tasksForSelectedDate={tasksForSelectedDate}
+        />
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleAppearanceChange('light')}>
+              <Sun className="h-4 w-4 mr-2" />
+              Light
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAppearanceChange('dark')}>
+              <Moon className="h-4 w-4 mr-2" />
+              Dark
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAppearanceChange('system')}>
+              <Monitor className="h-4 w-4 mr-2" />
+              System
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
@@ -171,100 +186,135 @@ const CalendarView: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-2">
-        <Card>
-          <CardContent className="p-4">
-            {navigationButtons}
-            <CalendarComponent
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="mx-auto"
-              month={currentMonth}
-              modifiersClassNames={{
-                selected: "bg-primary text-primary-foreground",
-              }}
-              modifiers={{
-                taskDay: (date) => getTasksForDate(date).length > 0
-              }}
-              modifiersStyles={{
-                taskDay: {
-                  fontWeight: "bold"
-                }
-              }}
-              components={{
-                DayContent: ({ date, ...props }) => {
-                  const tasks = getTasksForDate(date);
-                  const className = getDayClassName(date);
-                  
-                  return (
-                    <div 
-                      className={cn(
-                        "relative h-9 w-9 flex items-center justify-center",
-                        className
-                      )}
-                      {...props}
-                    >
-                      {date.getDate()}
-                      {tasks.length > 0 && (
-                        <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-                      )}
-                    </div>
-                  );
-                }
-              }}
-            />
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div>
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            {tasksForSelectedDate.length > 0 ? (
-              <div className="space-y-3">
-                {tasksForSelectedDate.map(task => (
-                  <div 
-                    key={task.id} 
-                    className={cn(
-                      "p-3 rounded-md border",
-                      task.completed ? "bg-gray-50 dark:bg-gray-800/50" : "bg-white dark:bg-gray-800"
-                    )}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className={cn(task.completed && "line-through text-muted-foreground")}>
-                        <h3 className="font-medium">{task.title}</h3>
-                        {task.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                        )}
-                      </div>
-                      <Badge 
-                        variant="outline" 
+      {viewMode === 'month' && (
+        <>
+          <div className="md:col-span-2">
+            <Card>
+              <CardContent className="p-4">
+                {navigationButtons}
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="mx-auto pointer-events-auto"
+                  month={currentMonth}
+                  modifiersClassNames={{
+                    selected: "bg-primary text-primary-foreground",
+                  }}
+                  modifiers={{
+                    taskDay: (date) => getTasksForDate(date).length > 0
+                  }}
+                  modifiersStyles={{
+                    taskDay: {
+                      fontWeight: "bold"
+                    }
+                  }}
+                  components={{
+                    DayContent: ({ date, ...props }) => {
+                      const tasks = getTasksForDate(date);
+                      const className = getDayClassName(date);
+                      
+                      return (
+                        <div 
+                          className={cn(
+                            "relative h-9 w-9 flex items-center justify-center",
+                            className
+                          )}
+                          {...props}
+                        >
+                          {date.getDate()}
+                          {tasks.length > 0 && (
+                            <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                          )}
+                        </div>
+                      );
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                {displayMode === 'list' ? (
+                  <div className="space-y-3">
+                    {tasksForSelectedDate.length > 0 ? tasksForSelectedDate.map(task => (
+                      <div 
+                        key={task.id} 
                         className={cn(
-                          "ml-2",
-                          getPriorityColor(task.priority).replace('text-', 'bg-').replace('anime-', '') + "/20",
-                          getPriorityColor(task.priority)
+                          "p-3 rounded-md border",
+                          task.completed ? "bg-gray-50 dark:bg-gray-800/50" : "bg-white dark:bg-gray-800"
                         )}
                       >
-                        {task.priority}
-                      </Badge>
-                    </div>
+                        <div className="flex items-start justify-between">
+                          <div className={cn(task.completed && "line-through text-muted-foreground")}>
+                            <h3 className="font-medium">{task.title}</h3>
+                            {task.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                            )}
+                          </div>
+                          <Badge 
+                            variant="outline" 
+                            className={cn(
+                              "ml-2",
+                              getPriorityColor(task.priority).replace('text-', 'bg-').replace('anime-', '') + "/20",
+                              getPriorityColor(task.priority)
+                            )}
+                          >
+                            {task.priority}
+                          </Badge>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No tasks scheduled for this date</p>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No tasks scheduled for this date</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                ) : (
+                  <GridView tasksForSelectedDate={tasksForSelectedDate} />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
+
+      {viewMode === 'week' && (
+        <div className="md:col-span-3">
+          <Card>
+            <CardContent className="p-4">
+              {navigationButtons}
+              <WeekView 
+                selectedDate={selectedDate}
+                tasks={state.tasks}
+                onSelectDate={setSelectedDate}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {viewMode === 'day' && (
+        <div className="md:col-span-3">
+          <Card>
+            <CardContent className="p-4">
+              {navigationButtons}
+              <DayView 
+                selectedDate={selectedDate}
+                tasks={state.tasks}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

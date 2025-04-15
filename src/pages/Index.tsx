@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import Sidebar from '@/components/Sidebar';
@@ -14,6 +15,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ListFilter, CalendarDays, LayoutDashboard, List, Star, BellRing, Bookmark } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { toast } from '@/components/ui/use-toast';
 
 const Index = () => {
   const { getFilteredTasks, state, setView } = useTodo();
@@ -74,6 +76,20 @@ const Index = () => {
 
   const handleViewChange = (view: string) => {
     setView(view as 'list' | 'calendar' | 'dashboard');
+  };
+  
+  const handleNotificationClick = () => {
+    toast({
+      title: "Notifications",
+      description: "You have no new notifications"
+    });
+  };
+  
+  const handleBookmarkClick = () => {
+    toast({
+      title: "Bookmarked",
+      description: "Current view has been bookmarked"
+    });
   };
 
   return (
@@ -169,6 +185,7 @@ const Index = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className="glass-card p-2 rounded-full cursor-pointer"
+                      onClick={handleNotificationClick}
                     >
                       <BellRing size={18} className="text-muted-foreground" />
                     </motion.div>
@@ -176,6 +193,7 @@ const Index = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className="glass-card p-2 rounded-full cursor-pointer"
+                      onClick={handleBookmarkClick}
                     >
                       <Bookmark size={18} className="text-muted-foreground" />
                     </motion.div>
