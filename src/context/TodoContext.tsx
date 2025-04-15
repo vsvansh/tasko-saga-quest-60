@@ -5,13 +5,13 @@ import { toast } from "@/components/ui/use-toast"
 
 interface TodoContextType {
   state: AppState;
-  addTask: (task: Omit<Task, 'id' | 'completed' | 'createdAt' | 'order'>) => void;
+  addTask: (task: Omit<Task, 'id' | 'completed' | 'createdAt' | 'order' | 'starred'>) => void;
   updateTask: (task: Task) => void;
   completeTask: (taskId: string, completed: boolean) => void;
   deleteTask: (taskId: string) => void;
   starTask: (taskId: string, starred: boolean) => void;
   reorderTasks: (tasks: Task[]) => void;
-  addCategory: (category: Omit<Category, 'id'>) => void;
+  addCategory: (category: Omit<Category, 'id' | 'order'>) => void;
   updateCategory: (category: Category) => void;
   deleteCategory: (categoryId: string) => void;
   reorderCategories: (categories: Category[]) => void;
@@ -19,6 +19,7 @@ interface TodoContextType {
   getFilteredTasks: () => Task[];
   getCategoryById: (categoryId: string) => Category | undefined;
   pinTask: (taskId: string, isPinned: boolean) => void;
+  setFilter: (filter: 'all' | 'active' | 'completed') => void;
 }
 
 const TodoContext = createContext<TodoContextType | undefined>(undefined);
@@ -133,7 +134,7 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setState(prev => ({ ...prev, tasks }));
   };
 
-  const addCategory = (category: Omit<Category, 'id'>) => {
+  const addCategory = (category: Omit<Category, 'id' | 'order'>) => {
     const newCategory: Category = {
       id: uuidv4(),
       ...category,
@@ -162,6 +163,10 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setSelectedCategory = (categoryId: string | null) => {
     setState(prev => ({ ...prev, selectedCategory: categoryId }));
+  };
+
+  const setFilter = (filter: 'all' | 'active' | 'completed') => {
+    setState(prev => ({ ...prev, filter }));
   };
 
   const getFilteredTasks = () => {
@@ -229,6 +234,7 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getFilteredTasks,
     getCategoryById,
     pinTask,
+    setFilter,
   };
 
   return <TodoContext.Provider value={value}>{children}</TodoContext.Provider>;
