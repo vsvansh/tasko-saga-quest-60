@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { Category, AppState } from '@/types';
 
@@ -9,7 +8,13 @@ export const useCategoryActions = (state: AppState, setState: React.Dispatch<Rea
       ...category,
       order: state.categories.length,
     };
-    setState(prev => ({ ...prev, categories: [...prev.categories, newCategory] }));
+    setState((prev) => ({
+      ...prev,
+      categories: [
+        ...prev.categories,
+        newCategory
+      ]
+    }));
   };
 
   const updateCategory = (category: Category) => {
