@@ -94,6 +94,11 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, editingTask }) 
     );
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    setDueDate(date);
+    setCalendarOpen(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -151,11 +156,9 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, editingTask }) 
                   <Calendar
                     mode="single"
                     selected={dueDate}
-                    onSelect={(date) => {
-                      setDueDate(date);
-                      setCalendarOpen(false);
-                    }}
+                    onSelect={handleDateSelect}
                     initialFocus
+                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>

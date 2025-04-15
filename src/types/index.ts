@@ -31,11 +31,13 @@ export interface Category {
   order: number;
 }
 
+export type TaskView = 'list' | 'board' | 'calendar' | 'dashboard';
+
 export interface AppState {
   tasks: Task[];
   categories: Category[];
   filter: 'all' | 'active' | 'completed';
   selectedCategory: string | null;
-  view: 'list' | 'board' | 'calendar'; // Added view type
-  tags: string[]; // Added tags array
+  view: TaskView;
+  tags: string[];
 }

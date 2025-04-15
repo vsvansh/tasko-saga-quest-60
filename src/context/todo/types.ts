@@ -1,5 +1,5 @@
 
-import { Task, Category, AppState } from '@/types';
+import { Task, Category, AppState, TaskView } from '@/types';
 
 export interface TodoContextType {
   state: AppState;
@@ -18,4 +18,5 @@ export interface TodoContextType {
   getCategoryById: (categoryId: string) => Category | undefined;
   pinTask: (taskId: string, isPinned: boolean) => void;
   setFilter: (filter: 'all' | 'active' | 'completed') => void;
+  setView: (view: TaskView) => void;
 }

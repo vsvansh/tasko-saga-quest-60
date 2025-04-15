@@ -6,12 +6,16 @@ import TaskList from '@/components/TaskList';
 import FilterBar from '@/components/FilterBar';
 import TaskForm from '@/components/TaskForm';
 import CategoryForm from '@/components/CategoryForm';
+import DashboardView from '@/components/DashboardView';
+import CalendarView from '@/components/CalendarView';
 import { Task, Category } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ListFilter, CalendarDays, LayoutDashboard, List } from 'lucide-react';
 
 const Index = () => {
-  const { getFilteredTasks } = useTodo();
+  const { getFilteredTasks, state, setView } = useTodo();
   const [taskFormOpen, setTaskFormOpen] = useState(false);
   const [categoryFormOpen, setCategoryFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -67,6 +71,10 @@ const Index = () => {
     setCategoryFormOpen(true);
   };
 
+  const handleViewChange = (view: string) => {
+    setView(view as 'list' | 'calendar' | 'dashboard');
+  };
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background overflow-hidden">
       <AnimatePresence>
@@ -118,9 +126,38 @@ const Index = () => {
             setSearchQuery={setSearchQuery}
           />
           
-          <AnimatePresence mode="wait">
-            <TaskList onEditTask={handleEditTask} />
-          </AnimatePresence>
+          <div className="mb-6">
+            <Tabs defaultValue={state.view} onValueChange={handleViewChange} value={state.view}>
+              <TabsList className="w-full mb-6">
+                <TabsTrigger value="list" className="flex-1">
+                  <List className="w-4 h-4 mr-2" />
+                  List View
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="flex-1">
+                  <CalendarDays className="w-4 h-4 mr-2" />
+                  Calendar
+                </TabsTrigger>
+                <TabsTrigger value="dashboard" className="flex-1">
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Dashboard
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="list" className="mt-0">
+                <AnimatePresence mode="wait">
+                  <TaskList onEditTask={handleEditTask} />
+                </AnimatePresence>
+              </TabsContent>
+              
+              <TabsContent value="calendar" className="mt-0">
+                <CalendarView />
+              </TabsContent>
+              
+              <TabsContent value="dashboard" className="mt-0">
+                <DashboardView />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </motion.main>
       
