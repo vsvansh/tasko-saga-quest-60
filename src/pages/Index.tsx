@@ -8,11 +8,13 @@ import TaskForm from '@/components/TaskForm';
 import CategoryForm from '@/components/CategoryForm';
 import DashboardView from '@/components/DashboardView';
 import CalendarView from '@/components/CalendarView';
+import Profile from '@/components/Profile';
 import { Task, Category } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ListFilter, CalendarDays, LayoutDashboard, List } from 'lucide-react';
+import { ListFilter, CalendarDays, LayoutDashboard, List, Star, BellRing, Bookmark } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const Index = () => {
   const { getFilteredTasks, state, setView } = useTodo();
@@ -114,46 +116,94 @@ const Index = () => {
       />
       
       <motion.main 
-        className="flex-1 px-6 lg:ml-64"
+        className="flex-1 px-4 md:px-6 lg:px-8 lg:ml-64 pb-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <div className="max-w-4xl mx-auto pt-16 lg:pt-8 pb-20">
+        <div className="max-w-5xl mx-auto pt-16 lg:pt-6 pb-20">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold hidden md:block gradient-text">Anime Task Manager</h1>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="hidden md:flex items-center gap-1 px-3 py-1 bg-primary/5">
+                <Star size={12} className="text-anime-yellow" />
+                <span>Pro</span>
+              </Badge>
+              <Profile userName="Anime Fan" />
+            </div>
+          </div>
+          
           <FilterBar 
             onAddTask={handleAddTask}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            className="mb-8"
           />
           
           <div className="mb-6">
-            <Tabs defaultValue={state.view} onValueChange={handleViewChange} value={state.view}>
-              <TabsList className="w-full mb-6">
-                <TabsTrigger value="list" className="flex-1">
+            <Tabs defaultValue={state.view} onValueChange={handleViewChange} value={state.view} className="space-y-6">
+              <TabsList className="w-full gap-1 p-1 h-12 bg-muted/80">
+                <TabsTrigger value="list" className="flex-1 h-10">
                   <List className="w-4 h-4 mr-2" />
                   List View
                 </TabsTrigger>
-                <TabsTrigger value="calendar" className="flex-1">
+                <TabsTrigger value="calendar" className="flex-1 h-10">
                   <CalendarDays className="w-4 h-4 mr-2" />
                   Calendar
                 </TabsTrigger>
-                <TabsTrigger value="dashboard" className="flex-1">
+                <TabsTrigger value="dashboard" className="flex-1 h-10">
                   <LayoutDashboard className="w-4 h-4 mr-2" />
                   Dashboard
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="list" className="mt-0">
+              <TabsContent value="list" className="mt-0 pt-4">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-semibold">Your Tasks</h2>
+                    <Badge variant="outline" className="bg-primary/5">
+                      {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
+                    </Badge>
+                  </div>
+                  <div className="flex gap-2">
+                    <motion.div 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="glass-card p-2 rounded-full cursor-pointer"
+                    >
+                      <BellRing size={18} className="text-muted-foreground" />
+                    </motion.div>
+                    <motion.div 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="glass-card p-2 rounded-full cursor-pointer"
+                    >
+                      <Bookmark size={18} className="text-muted-foreground" />
+                    </motion.div>
+                  </div>
+                </div>
                 <AnimatePresence mode="wait">
                   <TaskList onEditTask={handleEditTask} />
                 </AnimatePresence>
               </TabsContent>
               
-              <TabsContent value="calendar" className="mt-0">
+              <TabsContent value="calendar" className="mt-0 pt-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold">Calendar View</h2>
+                  <Badge variant="outline" className="bg-primary/5">
+                    {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </Badge>
+                </div>
                 <CalendarView />
               </TabsContent>
               
-              <TabsContent value="dashboard" className="mt-0">
+              <TabsContent value="dashboard" className="mt-0 pt-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold">Analytics Dashboard</h2>
+                  <Badge variant="outline" className="bg-primary/5">
+                    Last 30 days
+                  </Badge>
+                </div>
                 <DashboardView />
               </TabsContent>
             </Tabs>
