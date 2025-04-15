@@ -48,7 +48,6 @@ export const useTodo = () => {
 export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>(initialState);
 
-  // Load state from local storage on component mount
   useEffect(() => {
     try {
       const storedState = localStorage.getItem('todoAppState');
@@ -60,7 +59,6 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Save state to local storage whenever it changes
   useEffect(() => {
     try {
       localStorage.setItem('todoAppState', JSON.stringify(state));
@@ -197,17 +195,13 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         task.id === taskId ? { ...task, pinned: isPinned } : task
       );
       
-      // Sort tasks so pinned ones are at the top
       updatedTasks.sort((a, b) => {
-        // First sort by pinned status
         if (a.pinned && !b.pinned) return -1;
         if (!a.pinned && b.pinned) return 1;
         
-        // Then by completion status
         if (!a.completed && b.completed) return -1;
         if (a.completed && !b.completed) return 1;
         
-        // Then by order
         return a.order - b.order;
       });
       
