@@ -5,9 +5,10 @@ import { formatDate, isOverdue, getPriorityColor, getCategoryColor } from '@/lib
 import { useTodo } from '@/context/TodoContext';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Star, Pencil, Trash2, Calendar, AlertCircle } from 'lucide-react';
+import { Star, Pencil, Trash2, Calendar, AlertCircle, Clock, Pin, Bookmark, CircleCheck } from 'lucide-react';
 import { Draggable } from 'react-beautiful-dnd';
 import { motion } from 'framer-motion';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
 
 interface TaskItemProps {
   task: Task;
@@ -16,12 +17,26 @@ interface TaskItemProps {
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, index, onEdit }) => {
-  const { completeTask, deleteTask, starTask, getCategoryById } = useTodo();
+  const { completeTask, deleteTask, starTask, getCategoryById, pinTask } = useTodo();
   const [isHovered, setIsHovered] = useState(false);
   
   const priorityColor = getPriorityColor(task.priority);
   const isTaskOverdue = isOverdue(task.dueDate) && !task.completed;
   
+  // Define animations
+  const taskVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, x: -50 },
+    hover: { scale: 1.01 },
+  };
+  
+  // Animation for task completion
+  const checkmarkVariants = {
+    checked: { scale: 1.2, opacity: 1 },
+    unchecked: { scale: 1, opacity: 0.6 }
+  };
+
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided) => (
@@ -29,18 +44,25 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, onEdit }) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`task-card p-4 mb-3 ${task.completed ? 'opacity-60' : ''}`}
+          className={`task-card p-4 mb-3 ${task.completed ? 'opacity-60' : ''} ${task.pinned ? 'border-l-4 border-l-primary' : ''}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
           <motion.div
-            initial={false}
-            animate={task.completed ? { opacity: 0.6 } : { opacity: 1 }}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            whileHover="hover"
+            variants={taskVariants}
+            transition={{ duration: 0.2 }}
           >
             <div className="flex items-start gap-3">
-              <div 
+              <motion.div 
                 className="mt-1"
                 onClick={() => completeTask(task.id, !task.completed)}
+                variants={checkmarkVariants}
+                animate={task.completed ? "checked" : "unchecked"}
+                transition={{ type: "spring", stiffness: 500 }}
               >
                 <Checkbox 
                   checked={task.completed} 
@@ -49,24 +71,51 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, onEdit }) => {
                   }}
                   className={`${task.completed ? 'animate-task-complete' : ''}`}
                 />
-              </div>
+              </motion.div>
               
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 
-                    className={`font-medium text-lg ${task.completed ? 'line-through text-muted-foreground' : ''}`}
-                  >
-                    {task.title}
-                  </h3>
-                  
-                  <div className="flex items-center gap-1">
-                    {task.priority !== 'none' && (
-                      <Star 
-                        className={`${priorityColor} cursor-pointer ${task.starred ? 'fill-current' : ''}`}
-                        size={18}
-                        onClick={() => starTask(task.id, !task.starred)}
-                      />
+                  <div className="flex items-center gap-2">
+                    {task.pinned && (
+                      <Pin size={16} className="text-primary" />
                     )}
+                    <h3 
+                      className={`font-medium text-lg ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+                    >
+                      {task.title}
+                    </h3>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {task.priority !== 'none' && (
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-7 w-7"
+                            onClick={() => starTask(task.id, !task.starred)}
+                          >
+                            <Star 
+                              className={`${priorityColor} cursor-pointer ${task.starred ? 'fill-current' : ''}`}
+                              size={18}
+                            />
+                          </Button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-auto p-2">
+                          <span className="text-xs">{task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority</span>
+                        </HoverCardContent>
+                      </HoverCard>
+                    )}
+                    
+                    <Button
+                      variant="ghost" 
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => pinTask && pinTask(task.id, !task.pinned)}
+                    >
+                      <Bookmark className={`${task.pinned ? 'fill-primary text-primary' : 'text-muted-foreground'}`} size={16} />
+                    </Button>
                   </div>
                 </div>
                 
@@ -96,6 +145,13 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, onEdit }) => {
                       <span>{formatDate(task.dueDate)}</span>
                     </div>
                   )}
+
+                  {task.completed && task.completedAt && (
+                    <div className="flex items-center gap-1 text-xs text-anime-green">
+                      <CircleCheck size={14} />
+                      <span>Completed {formatDate(task.completedAt)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -110,6 +166,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, onEdit }) => {
                     variant="ghost" 
                     size="icon"
                     onClick={() => onEdit(task)}
+                    className="h-8 w-8"
                   >
                     <Pencil size={16} />
                   </Button>
@@ -117,6 +174,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, onEdit }) => {
                     variant="ghost" 
                     size="icon"
                     onClick={() => deleteTask(task.id)}
+                    className="h-8 w-8 text-anime-red/70 hover:text-anime-red"
                   >
                     <Trash2 size={16} />
                   </Button>

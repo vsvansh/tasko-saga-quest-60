@@ -10,8 +10,18 @@ export interface Task {
   priority: Priority;
   categoryIds: string[];
   createdAt: string;
+  completedAt?: string;
   order: number;
   starred: boolean;
+  pinned?: boolean;
+  subtasks?: SubTask[];
+  tags?: string[];
+}
+
+export interface SubTask {
+  id: string;
+  title: string;
+  completed: boolean;
 }
 
 export interface Category {
@@ -26,4 +36,6 @@ export interface AppState {
   categories: Category[];
   filter: 'all' | 'active' | 'completed';
   selectedCategory: string | null;
+  view: 'list' | 'board' | 'calendar'; // Added view type
+  tags: string[]; // Added tags array
 }

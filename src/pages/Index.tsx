@@ -18,6 +18,7 @@ const Index = () => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   // Filter tasks by search query
   useEffect(() => {
@@ -36,6 +37,15 @@ const Index = () => {
     
     setFilteredTasks(filtered);
   }, [searchQuery, getFilteredTasks]);
+
+  // Hide welcome message after 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWelcome(false);
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAddTask = () => {
     setEditingTask(null);
@@ -58,7 +68,38 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background overflow-hidden">
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div 
+            className="fixed inset-0 flex items-center justify-center z-50 bg-background/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div 
+              className="text-center"
+              initial={{ scale: 0.8, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 20 }}
+              transition={{ delay: 0.2, type: "spring" }}
+            >
+              <motion.h1 
+                className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{ duration: 1.5, times: [0, 0.5, 1] }}
+              >
+                Anime Task Manager
+              </motion.h1>
+              <p className="text-muted-foreground">Your tasks, organized with style</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       <Sidebar
         onAddCategory={handleAddCategory}
         onEditCategory={handleEditCategory}
@@ -66,9 +107,9 @@ const Index = () => {
       
       <motion.main 
         className="flex-1 px-6 lg:ml-64"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
       >
         <div className="max-w-4xl mx-auto pt-16 lg:pt-8 pb-20">
           <FilterBar 
