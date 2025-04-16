@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import Sidebar from '@/components/Sidebar';
@@ -19,7 +20,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useTheme } from '@/components/ThemeProvider';
 import { useSidebarToggle } from '@/context/SidebarToggleContext';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface IndexProps {
   view?: 'list' | 'calendar' | 'dashboard' | 'starred' | 'settings' | 'analytics' | 'archived';
