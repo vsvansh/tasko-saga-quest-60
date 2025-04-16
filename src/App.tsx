@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { TodoProvider } from "./context/TodoContext";
 import { ThemeProvider } from "./components/ThemeProvider";
+import SidebarToggleProvider from "./context/SidebarToggleContext";
 
 const queryClient = new QueryClient();
 
@@ -16,17 +17,23 @@ const App = () => (
     <ThemeProvider defaultTheme="light">
       <TooltipProvider>
         <TodoProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/calendar" element={<Index />} />
-              <Route path="/dashboard" element={<Index />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <SidebarToggleProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/calendar" element={<Index view="calendar" />} />
+                <Route path="/dashboard" element={<Index view="dashboard" />} />
+                <Route path="/starred" element={<Index view="starred" />} />
+                <Route path="/settings" element={<Index view="settings" />} />
+                <Route path="/archived" element={<Index view="archived" />} />
+                <Route path="/analytics" element={<Index view="analytics" />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </SidebarToggleProvider>
         </TodoProvider>
       </TooltipProvider>
     </ThemeProvider>

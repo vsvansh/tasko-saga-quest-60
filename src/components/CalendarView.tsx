@@ -5,7 +5,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Task } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn, getPriorityColor } from '@/lib/utils';
-import { format, isSameDay, addMonths, subMonths, startOfMonth, startOfWeek, isSameMonth } from 'date-fns';
+import { format, isSameDay, addMonths, subMonths, startOfMonth, isSameMonth } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,22 +13,26 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { 
   Calendar, Clock, ChevronLeft, ChevronRight, 
   ChevronsLeft, ChevronsRight, CalendarRange,
-  ArrowUpDown, List, Grid, Settings,
-  Sun, Moon, Monitor
+  Moon, Sun, Monitor,
+  Settings
 } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import CalendarViewEnhancements, { WeekView, DayView, GridView } from './CalendarViewEnhancements';
+import { toast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useTheme } from '@/components/ThemeProvider';
+import { WeekView, DayView, GridView } from './CalendarViewComponents';
 
 const CalendarView: React.FC = () => {
   const { state } = useTodo();
+  const { theme, setTheme } = useTheme();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [jumpDate, setJumpDate] = useState('');
   const [showJumpDatePopover, setShowJumpDatePopover] = useState(false);
   const [displayMode, setDisplayMode] = useState<'list' | 'grid'>('list');
-  const [appearance, setAppearance] = useState<'light' | 'dark' | 'system'>('system');
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [showCompletedTasks, setShowCompletedTasks] = useState(true);
+  const [showWeekends, setShowWeekends] = useState(true);
   
   // Function to get tasks for a specific date
   const getTasksForDate = (date: Date): Task[] => {
@@ -62,21 +66,29 @@ const CalendarView: React.FC = () => {
   };
 
   const handleAppearanceChange = (mode: 'light' | 'dark' | 'system') => {
-    setAppearance(mode);
+    setTheme(mode);
     
-    // This is just for demo purposes - in a real app, you would use a theme provider
     toast({
       title: "Appearance changed",
       description: `Calendar view set to ${mode} mode`
     });
   };
+  
+  const handleSettingsSave = () => {
+    toast({
+      title: "Settings saved",
+      description: "Your calendar preferences have been updated"
+    });
+    setShowSettingsDialog(false);
+  };
 
   const navigationButtons = (
-    <div className="flex items-center gap-2 mb-4">
+    <div className="flex flex-wrap items-center gap-2 mb-4">
       <Button
         variant="outline"
         size="icon"
         onClick={() => setCurrentMonth(prev => startOfMonth(subMonths(prev, 12)))}
+        title="Previous year"
       >
         <ChevronsLeft className="h-4 w-4" />
       </Button>
@@ -84,6 +96,7 @@ const CalendarView: React.FC = () => {
         variant="outline"
         size="icon"
         onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
+        title="Previous month"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -97,6 +110,7 @@ const CalendarView: React.FC = () => {
         variant="outline"
         size="icon"
         onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
+        title="Next month"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
@@ -104,6 +118,7 @@ const CalendarView: React.FC = () => {
         variant="outline"
         size="icon"
         onClick={() => setCurrentMonth(prev => startOfMonth(addMonths(prev, 12)))}
+        title="Next year"
       >
         <ChevronsRight className="h-4 w-4" />
       </Button>
@@ -129,15 +144,47 @@ const CalendarView: React.FC = () => {
       </Popover>
 
       <div className="ml-auto flex items-center gap-2">
-        <CalendarViewEnhancements
-          viewMode={viewMode}
-          displayMode={displayMode}
-          selectedDate={selectedDate}
-          currentMonth={currentMonth}
-          onViewModeChange={setViewMode}
-          onDisplayModeChange={setDisplayMode}
-          tasksForSelectedDate={tasksForSelectedDate}
-        />
+        <div className="flex items-center space-x-2">
+          <Button
+            variant={viewMode === 'month' ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode('month')}
+          >
+            Month
+          </Button>
+          <Button
+            variant={viewMode === 'week' ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode('week')}
+          >
+            Week
+          </Button>
+          <Button
+            variant={viewMode === 'day' ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode('day')}
+          >
+            Day
+          </Button>
+        </div>
+        
+        <div className="ml-2">
+          <Button
+            variant={displayMode === 'list' ? "default" : "outline"}
+            size="sm"
+            onClick={() => setDisplayMode('list')}
+            className="mr-1"
+          >
+            List
+          </Button>
+          <Button
+            variant={displayMode === 'grid' ? "default" : "outline"}
+            size="sm"
+            onClick={() => setDisplayMode('grid')}
+          >
+            Grid
+          </Button>
+        </div>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -35,7 +35,9 @@ const sampleTasks: Task[] = [
     dueDate: nextWeek.toISOString(),
     priority: 'high',
     categoryIds: ['cat-1'],
-    starred: true
+    starred: true,
+    createdAt: new Date(today).setDate(today.getDate() - 7),
+    order: 0
   },
   {
     id: 'task-2',
@@ -45,7 +47,9 @@ const sampleTasks: Task[] = [
     dueDate: tomorrow.toISOString(),
     priority: 'medium',
     categoryIds: ['cat-2'],
-    starred: false
+    starred: false,
+    createdAt: new Date(today).setDate(today.getDate() - 5),
+    order: 1
   },
   {
     id: 'task-3',
@@ -55,7 +59,9 @@ const sampleTasks: Task[] = [
     dueDate: nextWeek.toISOString(),
     priority: 'high',
     categoryIds: ['cat-3'],
-    starred: true
+    starred: true,
+    createdAt: new Date(today).setDate(today.getDate() - 3),
+    order: 2
   },
   {
     id: 'task-4',
@@ -65,7 +71,9 @@ const sampleTasks: Task[] = [
     dueDate: today.toISOString(),
     priority: 'low',
     categoryIds: ['cat-4'],
-    starred: false
+    starred: false,
+    createdAt: new Date(today).setDate(today.getDate() - 2),
+    order: 3
   },
   {
     id: 'task-5',
@@ -75,7 +83,9 @@ const sampleTasks: Task[] = [
     dueDate: tomorrow.toISOString(),
     priority: 'medium',
     categoryIds: ['cat-1'],
-    starred: false
+    starred: false,
+    createdAt: new Date(today).setDate(today.getDate() - 1),
+    order: 4
   }
 ];
 
