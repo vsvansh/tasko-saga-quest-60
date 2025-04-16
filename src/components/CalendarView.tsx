@@ -97,6 +97,12 @@ const CalendarView: React.FC = () => {
       if (!isSameMonth(date, currentMonth)) {
         setCurrentMonth(date);
       }
+      
+      // Add a toast notification to indicate date selection
+      toast({
+        title: "Date selected",
+        description: `Selected ${format(date, 'PPP')}`
+      });
     }
   };
 
