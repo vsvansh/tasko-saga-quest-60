@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { User, Settings, Bell, Moon, Sun, LogOut, Heart, Star } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/components/ThemeProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
@@ -26,6 +27,7 @@ const Profile: React.FC<ProfileProps> = ({ userName = 'User' }) => {
   const [open, setOpen] = useState(false);
   const [starred, setStarred] = useState<boolean>(false);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [animations, setAnimations] = useState<boolean>(true);
 
   const handleSaveProfile = () => {
     toast({
@@ -41,6 +43,21 @@ const Profile: React.FC<ProfileProps> = ({ userName = 'User' }) => {
       description: "Your settings have been updated successfully."
     });
     setOpen(false);
+  };
+
+  const handleLogout = () => {
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully."
+    });
+    setOpen(false);
+  };
+
+  const handleSupport = () => {
+    toast({
+      title: "Support",
+      description: "Thank you for your support!"
+    });
   };
 
   const handleStarredClick = () => {
@@ -133,6 +150,14 @@ const Profile: React.FC<ProfileProps> = ({ userName = 'User' }) => {
                         placeholder="Your email" 
                       />
                     </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="bio">Bio</Label>
+                      <textarea 
+                        id="bio" 
+                        className="flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Tell us about yourself" 
+                      />
+                    </div>
                   </div>
                   
                   <Button onClick={handleSaveProfile} className="w-full">
@@ -183,6 +208,23 @@ const Profile: React.FC<ProfileProps> = ({ userName = 'User' }) => {
                     <Switch defaultChecked />
                   </div>
                   
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Data Backup</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Backup your task data weekly
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      toast({
+                        title: "Backup enabled",
+                        description: "Weekly backups have been enabled"
+                      });
+                    }}>
+                      Enable
+                    </Button>
+                  </div>
+                  
                   <Button onClick={handleSaveSettings} className="w-full mt-4">
                     Save Settings
                   </Button>
@@ -229,7 +271,48 @@ const Profile: React.FC<ProfileProps> = ({ userName = 'User' }) => {
                       Enable UI animations
                     </p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={animations}
+                    onCheckedChange={setAnimations}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">High Contrast</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Improve visual accessibility
+                    </p>
+                  </div>
+                  <Switch onClick={() => {
+                    toast({
+                      title: "High contrast toggled",
+                      description: "High contrast mode has been toggled"
+                    });
+                  }} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Font Size</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Adjust text size
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => {
+                      toast({
+                        title: "Font size decreased",
+                        description: "Text size has been decreased"
+                      });
+                    }}>A-</Button>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      toast({
+                        title: "Font size increased",
+                        description: "Text size has been increased"
+                      });
+                    }}>A+</Button>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
@@ -237,11 +320,11 @@ const Profile: React.FC<ProfileProps> = ({ userName = 'User' }) => {
             <Separator />
             
             <div className="flex justify-between">
-              <Button variant="outline" className="flex items-center gap-2" onClick={() => setOpen(false)}>
+              <Button variant="outline" className="flex items-center gap-2" onClick={handleSupport}>
                 <Heart className="h-4 w-4 text-anime-red" />
                 Support
               </Button>
-              <Button variant="outline" className="text-destructive flex items-center gap-2">
+              <Button variant="outline" className="text-destructive flex items-center gap-2" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />
                 Log out
               </Button>
