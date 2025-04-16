@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import { Category, Task } from '@/types';
@@ -11,8 +10,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { getCategoryColor } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Moon, Sun } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { useTheme } from '@/components/ThemeProvider';
+import { Switch } from '@/components/ui/switch';
 import { 
   Dialog, 
   DialogContent, 
@@ -29,6 +30,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
   const { state, setSelectedCategory, deleteCategory, reorderCategories, setFilter } = useTodo();
+  const { theme, setTheme } = useTheme();
   const [isHovering, setIsHovering] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
@@ -74,6 +76,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
 
   const handleSettingsClick = () => {
     setShowSettings(true);
+  };
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    toast({
+      title: "Theme changed",
+      description: `Changed to ${newTheme} mode`
+    });
   };
 
   const totalTasks = state.tasks.length;
@@ -301,21 +312,31 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
                 <Plus size={16} />
                 Add Category
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full mt-2 flex items-center gap-2 text-muted-foreground"
-                onClick={handleSettingsClick}
-              >
-                <Settings size={14} />
-                Settings
-              </Button>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 flex items-center gap-2 text-muted-foreground"
+                  onClick={handleSettingsClick}
+                >
+                  <Settings size={14} />
+                  Settings
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 flex items-center justify-center gap-2 text-muted-foreground"
+                  onClick={toggleTheme}
+                >
+                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                  {theme === 'dark' ? 'Light' : 'Dark'}
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent>
           <DialogHeader>
@@ -327,14 +348,20 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
           <div className="py-4 space-y-4">
             <div className="flex items-center justify-between">
               <span>Dark Mode</span>
-              <Button variant="outline" size="sm" onClick={() => {
-                toast({
-                  title: "Theme changed",
-                  description: "Theme preference has been saved"
-                });
-              }}>
-                Toggle
-              </Button>
+              <div className="flex items-center">
+                <Sun className="h-4 w-4 mr-2 text-muted-foreground" />
+                <Switch 
+                  checked={theme === 'dark'}
+                  onCheckedChange={(checked) => {
+                    setTheme(checked ? 'dark' : 'light');
+                    toast({
+                      title: "Theme changed",
+                      description: `Changed to ${checked ? 'dark' : 'light'} mode`
+                    });
+                  }}
+                />
+                <Moon className="h-4 w-4 ml-2 text-muted-foreground" />
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <span>Notifications</span>
@@ -365,7 +392,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Starred Tasks Dialog */}
       <Dialog open={showStarredTasks} onOpenChange={setShowStarredTasks}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -404,7 +430,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onAddCategory, onEditCategory }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Notifications Dialog */}
       <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
         <DialogContent>
           <DialogHeader>

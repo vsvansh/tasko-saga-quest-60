@@ -13,9 +13,11 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useTodo } from '@/context/TodoContext';
+
 interface ProfileProps {
   userName?: string;
 }
+
 const Profile: React.FC<ProfileProps> = ({
   userName = 'User'
 }) => {
@@ -37,18 +39,21 @@ const Profile: React.FC<ProfileProps> = ({
   const [bio, setBio] = useState<string>('');
   const [highContrast, setHighContrast] = useState<boolean>(false);
   const [fontSize, setFontSize] = useState<number>(16);
+
   const handleSaveProfile = () => {
     toast({
       title: "Profile updated",
       description: "Your profile has been updated successfully."
     });
   };
+
   const handleSaveSettings = () => {
     toast({
       title: "Settings updated",
       description: "Your settings have been updated successfully."
     });
   };
+
   const handleLogout = () => {
     toast({
       title: "Logged out",
@@ -56,6 +61,7 @@ const Profile: React.FC<ProfileProps> = ({
     });
     setOpen(false);
   };
+
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     setTheme(newTheme);
     toast({
@@ -63,12 +69,14 @@ const Profile: React.FC<ProfileProps> = ({
       description: `Theme has been changed to ${newTheme} mode.`
     });
   };
+
   const handleSupport = () => {
     toast({
       title: "Support",
       description: "Thank you for your support! Our team will contact you soon."
     });
   };
+
   const handleStarredClick = () => {
     setStarred(!starred);
     toast({
@@ -76,6 +84,7 @@ const Profile: React.FC<ProfileProps> = ({
       description: starred ? "Item removed from your starred list" : "Item added to your starred list"
     });
   };
+
   const handleNotificationsClick = () => {
     setShowNotifications(!showNotifications);
     toast({
@@ -83,6 +92,7 @@ const Profile: React.FC<ProfileProps> = ({
       description: showNotifications ? "You won't receive notifications" : "You'll receive notifications"
     });
   };
+
   const changeFontSize = (increment: boolean) => {
     const newSize = increment ? fontSize + 1 : fontSize - 1;
     setFontSize(newSize);
@@ -91,6 +101,7 @@ const Profile: React.FC<ProfileProps> = ({
       description: `Text size has been ${increment ? 'increased' : 'decreased'} to ${newSize}px`
     });
   };
+
   return <div className="flex items-center gap-2">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
@@ -228,15 +239,27 @@ const Profile: React.FC<ProfileProps> = ({
                 <div className="space-y-4">
                   <h3 className="font-medium text-base">Theme</h3>
                   <div className="grid grid-cols-3 gap-2">
-                    <Button variant={theme === "light" ? "default" : "outline"} className="justify-start" onClick={() => handleThemeChange("light")}>
+                    <Button 
+                      variant={theme === "light" ? "default" : "outline"} 
+                      className="justify-start" 
+                      onClick={() => handleThemeChange("light")}
+                    >
                       <Sun className="mr-2 h-4 w-4" />
                       Light
                     </Button>
-                    <Button variant={theme === "dark" ? "default" : "outline"} className="justify-start" onClick={() => handleThemeChange("dark")}>
+                    <Button 
+                      variant={theme === "dark" ? "default" : "outline"} 
+                      className="justify-start" 
+                      onClick={() => handleThemeChange("dark")}
+                    >
                       <Moon className="mr-2 h-4 w-4" />
                       Dark
                     </Button>
-                    <Button variant={theme === "system" ? "default" : "outline"} className="justify-start" onClick={() => handleThemeChange("system")}>
+                    <Button 
+                      variant={theme === "system" ? "default" : "outline"} 
+                      className="justify-start" 
+                      onClick={() => handleThemeChange("system")}
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       System
                     </Button>
@@ -321,4 +344,5 @@ const Profile: React.FC<ProfileProps> = ({
       </Button>
     </div>;
 };
+
 export default Profile;
