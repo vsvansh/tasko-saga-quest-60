@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { format, isSameMonth, addDays, startOfWeek, isWithinInterval, isToday } from 'date-fns';
+import { format, isSameMonth, addDays, startOfWeek, isWithinInterval, isToday, isSameDay } from 'date-fns';
 import { Task } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -24,14 +24,11 @@ export const WeekView: React.FC<{
       {weekDates.map((date, index) => {
         const dayTasks = tasks.filter(task => 
           task.dueDate && 
-          isSameMonth(new Date(task.dueDate), date) &&
-          new Date(task.dueDate).getDate() === date.getDate()
+          isSameDay(new Date(task.dueDate), date)
         );
         
         const isSelected = selectedDate && 
-          selectedDate.getDate() === date.getDate() &&
-          selectedDate.getMonth() === date.getMonth() &&
-          selectedDate.getFullYear() === date.getFullYear();
+          isSameDay(selectedDate, date);
         
         const isCurrentDay = isToday(date);
         
@@ -111,8 +108,7 @@ export const DayView: React.FC<{
   const date = selectedDate || new Date();
   const dayTasks = tasks.filter(task => 
     task.dueDate && 
-    isSameMonth(new Date(task.dueDate), date) &&
-    new Date(task.dueDate).getDate() === date.getDate()
+    isSameDay(new Date(task.dueDate), date)
   );
   
   // Generate time slots for the day (hourly from 8AM to 8PM)

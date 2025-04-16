@@ -38,9 +38,13 @@ const CalendarView: React.FC = () => {
   
   // Function to get tasks for a specific date
   const getTasksForDate = (date: Date): Task[] => {
-    return state.tasks.filter(task => 
-      task.dueDate && isSameDay(new Date(task.dueDate), date)
-    );
+    if (!date) return [];
+    
+    return state.tasks.filter(task => {
+      if (!task.dueDate) return false;
+      const taskDate = new Date(task.dueDate);
+      return isSameDay(taskDate, date);
+    });
   };
   
   // Get tasks for selected date
@@ -103,6 +107,9 @@ const CalendarView: React.FC = () => {
         title: "Date selected",
         description: `Selected ${format(date, 'PPP')}`
       });
+      
+      // Log the tasks for this date to help debug
+      console.log('Tasks for selected date:', getTasksForDate(date));
     }
   };
 
