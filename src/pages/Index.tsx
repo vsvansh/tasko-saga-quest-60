@@ -19,9 +19,12 @@ import { toast } from '@/components/ui/use-toast';
 import { useTheme } from '@/components/ThemeProvider';
 import { useSidebarToggle } from '@/context/SidebarToggleContext';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/useIsMobile';
+
 interface IndexProps {
   view?: 'list' | 'calendar' | 'dashboard' | 'starred' | 'settings' | 'analytics' | 'archived';
 }
+
 const Index: React.FC<IndexProps> = ({
   view = 'list'
 }) => {
@@ -45,13 +48,12 @@ const Index: React.FC<IndexProps> = ({
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [showWelcome, setShowWelcome] = useState(true);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
-  // Initialize the current view from props
   useEffect(() => {
     setView(view);
   }, [view, setView]);
 
-  // Filter tasks by search query
   useEffect(() => {
     const tasks = getFilteredTasks();
     if (searchQuery.trim() === '') {
@@ -63,40 +65,46 @@ const Index: React.FC<IndexProps> = ({
     setFilteredTasks(filtered);
   }, [searchQuery, getFilteredTasks]);
 
-  // Hide welcome message after 3 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowWelcome(false);
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
+
   const handleAddTask = () => {
     setEditingTask(null);
     setTaskFormOpen(true);
   };
+
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
     setTaskFormOpen(true);
   };
+
   const handleAddCategory = () => {
     setEditingCategory(null);
     setCategoryFormOpen(true);
   };
+
   const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
     setCategoryFormOpen(true);
   };
+
   const handleViewChange = (viewValue: string) => {
     const newView = viewValue as 'list' | 'calendar' | 'dashboard' | 'starred' | 'settings' | 'archived' | 'analytics';
     setView(newView);
     navigate(`/${viewValue === 'list' ? '' : viewValue}`);
   };
+
   const handleNotificationClick = () => {
     toast({
       title: "Notifications",
       description: "You have no new notifications"
     });
   };
+
   const handleBookmarkClick = () => {
     toast({
       title: "Bookmarked",
@@ -104,8 +112,8 @@ const Index: React.FC<IndexProps> = ({
     });
   };
 
-  // Get starred tasks for the starred view
   const starredTasks = state.tasks.filter(task => task.starred);
+
   return <div className="min-h-screen flex flex-col lg:flex-row bg-background overflow-hidden">
       <AnimatePresence>
         {showWelcome && <motion.div className="fixed inset-0 flex items-center justify-center z-50 bg-background/80 backdrop-blur-sm" initial={{
@@ -170,22 +178,22 @@ const Index: React.FC<IndexProps> = ({
           
           <div className="mb-6">
             <Tabs defaultValue={state.view} onValueChange={handleViewChange} value={state.view} className="space-y-6">
-              <TabsList className="w-full gap-1 p-1 h-12 bg-muted/80">
-                <TabsTrigger value="list" className="flex-1 h-10">
-                  <List className="w-4 h-4 mr-2" />
-                  List View
+              <TabsList className="w-full gap-1 p-1 h-12 bg-muted/80 flex flex-wrap justify-center sm:flex-nowrap">
+                <TabsTrigger value="list" className="flex-1 h-10 min-w-[80px]">
+                  <List className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">List View</span>
                 </TabsTrigger>
-                <TabsTrigger value="calendar" className="flex-1 h-10">
-                  <CalendarDays className="w-4 h-4 mr-2" />
-                  Calendar
+                <TabsTrigger value="calendar" className="flex-1 h-10 min-w-[80px]">
+                  <CalendarDays className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Calendar</span>
                 </TabsTrigger>
-                <TabsTrigger value="dashboard" className="flex-1 h-10">
-                  <LayoutDashboard className="w-4 h-4 mr-2" />
-                  Dashboard
+                <TabsTrigger value="dashboard" className="flex-1 h-10 min-w-[80px]">
+                  <LayoutDashboard className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Dashboard</span>
                 </TabsTrigger>
-                <TabsTrigger value="starred" className="flex-1 h-10">
-                  <Star className="w-4 h-4 mr-2" />
-                  Starred
+                <TabsTrigger value="starred" className="flex-1 h-10 min-w-[80px]">
+                  <Star className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Starred</span>
                 </TabsTrigger>
               </TabsList>
               
@@ -299,8 +307,8 @@ const Index: React.FC<IndexProps> = ({
     </div>;
 };
 
-// Utility function to conditionally apply classes
 const cn = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(' ');
 };
+
 export default Index;
