@@ -36,7 +36,7 @@ const sampleTasks: Task[] = [
     priority: 'high',
     categoryIds: ['cat-1'],
     starred: true,
-    createdAt: new Date(today).setDate(today.getDate() - 7),
+    createdAt: new Date(today).setDate(today.getDate() - 7).toString(),
     order: 0
   },
   {
@@ -48,7 +48,7 @@ const sampleTasks: Task[] = [
     priority: 'medium',
     categoryIds: ['cat-2'],
     starred: false,
-    createdAt: new Date(today).setDate(today.getDate() - 5),
+    createdAt: new Date(today).setDate(today.getDate() - 5).toString(),
     order: 1
   },
   {
@@ -60,7 +60,7 @@ const sampleTasks: Task[] = [
     priority: 'high',
     categoryIds: ['cat-3'],
     starred: true,
-    createdAt: new Date(today).setDate(today.getDate() - 3),
+    createdAt: new Date(today).setDate(today.getDate() - 3).toString(),
     order: 2
   },
   {
@@ -72,7 +72,7 @@ const sampleTasks: Task[] = [
     priority: 'low',
     categoryIds: ['cat-4'],
     starred: false,
-    createdAt: new Date(today).setDate(today.getDate() - 2),
+    createdAt: new Date(today).setDate(today.getDate() - 2).toString(),
     order: 3
   },
   {
@@ -84,7 +84,7 @@ const sampleTasks: Task[] = [
     priority: 'medium',
     categoryIds: ['cat-1'],
     starred: false,
-    createdAt: new Date(today).setDate(today.getDate() - 1),
+    createdAt: new Date(today).setDate(today.getDate() - 1).toString(),
     order: 4
   }
 ];

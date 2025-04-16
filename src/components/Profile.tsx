@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useTodo } from '@/context/TodoContext';
 
 interface ProfileProps {
   userName?: string;
@@ -20,6 +21,7 @@ interface ProfileProps {
 
 const Profile: React.FC<ProfileProps> = ({ userName = 'User' }) => {
   const { theme, setTheme } = useTheme();
+  const { state } = useTodo();
   const [name, setName] = useState(userName);
   const [email, setEmail] = useState('user@example.com');
   const [notifications, setNotifications] = useState(true);

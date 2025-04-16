@@ -31,7 +31,7 @@ export interface Category {
   order: number;
 }
 
-export type TaskView = 'list' | 'board' | 'calendar' | 'dashboard';
+export type TaskView = 'list' | 'board' | 'calendar' | 'dashboard' | 'starred' | 'settings' | 'analytics' | 'archived';
 
 export interface AppState {
   tasks: Task[];
