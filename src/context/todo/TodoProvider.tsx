@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import TodoContext from './TodoContext';
 import { initialState } from './initialState';
@@ -22,9 +21,10 @@ const sampleCategories: Category[] = [
 ];
 
 const today = new Date();
-const generateDate = (daysOffset: number) => {
+const generateDate = (daysOffset: number, hoursOffset: number = 0) => {
   const date = new Date(today);
   date.setDate(date.getDate() + daysOffset);
+  date.setHours(date.getHours() + hoursOffset);
   return date.toISOString();
 };
 
@@ -34,7 +34,7 @@ const sampleTasks: Task[] = [
     title: 'Complete project proposal',
     description: 'Finish the draft and send it to the team for review',
     completed: true,
-    dueDate: generateDate(0),
+    dueDate: generateDate(0, 11),
     priority: 'high',
     categoryIds: ['cat-1'],
     starred: true,
@@ -47,7 +47,7 @@ const sampleTasks: Task[] = [
     title: 'Morning workout',
     description: 'Complete 30-minute cardio session',
     completed: true,
-    dueDate: generateDate(-1),
+    dueDate: generateDate(-1, 8),
     priority: 'medium',
     categoryIds: ['cat-4'],
     starred: false,
@@ -60,7 +60,7 @@ const sampleTasks: Task[] = [
     title: 'Study for certification',
     description: 'Review chapters 3-5 and complete practice tests',
     completed: false,
-    dueDate: generateDate(2),
+    dueDate: generateDate(2, 14),
     priority: 'high',
     categoryIds: ['cat-3'],
     starred: true,
@@ -72,7 +72,7 @@ const sampleTasks: Task[] = [
     title: 'Weekly team meeting',
     description: 'Discuss project progress and roadblocks',
     completed: true,
-    dueDate: generateDate(-5),
+    dueDate: generateDate(-5, 10),
     priority: 'medium',
     categoryIds: ['cat-1'],
     starred: false,
@@ -85,7 +85,7 @@ const sampleTasks: Task[] = [
     title: 'Client presentation',
     description: 'Prepare slides for the quarterly review',
     completed: false,
-    dueDate: generateDate(1),
+    dueDate: generateDate(1, 15),
     priority: 'high',
     categoryIds: ['cat-1', 'cat-5'],
     starred: true,
@@ -97,7 +97,7 @@ const sampleTasks: Task[] = [
     title: 'Update personal blog',
     description: 'Write new article about productivity tips',
     completed: false,
-    dueDate: generateDate(4),
+    dueDate: generateDate(4, 16),
     priority: 'low',
     categoryIds: ['cat-2'],
     starred: false,
@@ -109,7 +109,7 @@ const sampleTasks: Task[] = [
     title: 'Read technical documentation',
     description: 'Review new framework features',
     completed: true,
-    dueDate: generateDate(-3),
+    dueDate: generateDate(-3, 9),
     priority: 'medium',
     categoryIds: ['cat-3'],
     starred: false,
@@ -122,7 +122,7 @@ const sampleTasks: Task[] = [
     title: 'Quarterly planning',
     description: 'Define objectives and key results for next quarter',
     completed: false,
-    dueDate: generateDate(7),
+    dueDate: generateDate(7, 13),
     priority: 'high',
     categoryIds: ['cat-1', 'cat-5'],
     starred: true,
@@ -134,7 +134,7 @@ const sampleTasks: Task[] = [
     title: 'Health checkup',
     description: 'Annual medical examination',
     completed: false,
-    dueDate: generateDate(5),
+    dueDate: generateDate(5, 10),
     priority: 'medium',
     categoryIds: ['cat-2', 'cat-4'],
     starred: false,
@@ -146,7 +146,7 @@ const sampleTasks: Task[] = [
     title: 'Project milestone review',
     description: 'Evaluate progress and update timeline',
     completed: true,
-    dueDate: generateDate(-1),
+    dueDate: generateDate(-1, 14),
     priority: 'high',
     categoryIds: ['cat-1', 'cat-5'],
     starred: false,
@@ -154,13 +154,12 @@ const sampleTasks: Task[] = [
     completedAt: generateDate(-1),
     order: 9
   },
-  // Adding more sample tasks for better data visualization
   {
     id: 'task-11',
     title: 'Watch Demon Slayer new episode',
     description: 'Season 4 Episode 3 just released',
     completed: false,
-    dueDate: generateDate(0),
+    dueDate: generateDate(0, 19),
     priority: 'high',
     categoryIds: ['cat-6', 'cat-2'],
     starred: true,
@@ -172,7 +171,7 @@ const sampleTasks: Task[] = [
     title: 'Finish One Piece manga chapter',
     description: 'Chapter 1108 reading',
     completed: false,
-    dueDate: generateDate(1),
+    dueDate: generateDate(1, 20),
     priority: 'medium',
     categoryIds: ['cat-6'],
     starred: true,
@@ -184,7 +183,7 @@ const sampleTasks: Task[] = [
     title: 'Anime convention planning',
     description: 'Book tickets and plan cosplay',
     completed: false,
-    dueDate: generateDate(15),
+    dueDate: generateDate(15, 9),
     priority: 'medium',
     categoryIds: ['cat-6', 'cat-2'],
     starred: false,
@@ -196,7 +195,7 @@ const sampleTasks: Task[] = [
     title: 'Weekly grocery shopping',
     description: 'Buy fruits, vegetables, and essentials',
     completed: true,
-    dueDate: generateDate(-2),
+    dueDate: generateDate(-2, 11),
     priority: 'medium',
     categoryIds: ['cat-2'],
     starred: false,
@@ -209,7 +208,7 @@ const sampleTasks: Task[] = [
     title: 'Dentist appointment',
     description: 'Regular checkup at Dr. Smith',
     completed: false,
-    dueDate: generateDate(3),
+    dueDate: generateDate(3, 13),
     priority: 'high',
     categoryIds: ['cat-4'],
     starred: false,

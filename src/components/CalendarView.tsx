@@ -1,11 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Task } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn, getPriorityColor } from '@/lib/utils';
-import { format, isSameDay, addMonths, subMonths, startOfMonth, isSameMonth } from 'date-fns';
+import { format, isSameDay, addMonths, subMonths, startOfMonth, isSameMonth, addWeeks, subWeeks, addDays, subDays } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,7 +35,6 @@ const CalendarView: React.FC = () => {
   const [showWeekends, setShowWeekends] = useState(true);
   const [taskDetailId, setTaskDetailId] = useState<string | null>(null);
   
-  // Function to get tasks for a specific date
   const getTasksForDate = (date: Date): Task[] => {
     if (!date) return [];
     
@@ -46,11 +44,68 @@ const CalendarView: React.FC = () => {
       return isSameDay(taskDate, date);
     });
   };
-  
-  // Get tasks for selected date
+
   const tasksForSelectedDate = selectedDate 
     ? getTasksForDate(selectedDate) 
     : [];
+
+  const navigateToPreviousUnit = () => {
+    if (viewMode === 'month') {
+      setCurrentMonth(prev => subMonths(prev, 1));
+    } else if (viewMode === 'week') {
+      const newDate = subWeeks(selectedDate || new Date(), 1);
+      setSelectedDate(newDate);
+      setCurrentMonth(newDate);
+    } else if (viewMode === 'day') {
+      const newDate = subDays(selectedDate || new Date(), 1);
+      setSelectedDate(newDate);
+      setCurrentMonth(newDate);
+    }
+  };
+
+  const navigateToNextUnit = () => {
+    if (viewMode === 'month') {
+      setCurrentMonth(prev => addMonths(prev, 1));
+    } else if (viewMode === 'week') {
+      const newDate = addWeeks(selectedDate || new Date(), 1);
+      setSelectedDate(newDate);
+      setCurrentMonth(newDate);
+    } else if (viewMode === 'day') {
+      const newDate = addDays(selectedDate || new Date(), 1);
+      setSelectedDate(newDate);
+      setCurrentMonth(newDate);
+    }
+  };
+
+  const navigateToPreviousYear = () => {
+    const newDate = new Date(selectedDate || new Date());
+    newDate.setFullYear(newDate.getFullYear() - 1);
+    
+    if (viewMode === 'month') {
+      setCurrentMonth(startOfMonth(newDate));
+    } else {
+      setSelectedDate(newDate);
+      setCurrentMonth(newDate);
+    }
+  };
+
+  const navigateToNextYear = () => {
+    const newDate = new Date(selectedDate || new Date());
+    newDate.setFullYear(newDate.getFullYear() + 1);
+    
+    if (viewMode === 'month') {
+      setCurrentMonth(startOfMonth(newDate));
+    } else {
+      setSelectedDate(newDate);
+      setCurrentMonth(newDate);
+    }
+  };
+
+  const navigateToToday = () => {
+    const today = new Date();
+    setCurrentMonth(today);
+    setSelectedDate(today);
+  };
 
   const handleJumpToDate = () => {
     const date = new Date(jumpDate);
@@ -88,27 +143,22 @@ const CalendarView: React.FC = () => {
     setShowSettingsDialog(false);
   };
 
-  // Handle task click for animation and details
   const handleTaskClick = (taskId: string) => {
     setTaskDetailId(taskId === taskDetailId ? null : taskId);
   };
 
   const handleDateChange = (date: Date | undefined) => {
-    // Fix date selection
     if (date) {
       setSelectedDate(date);
-      // Also update the current month if the selected date is in a different month
       if (!isSameMonth(date, currentMonth)) {
         setCurrentMonth(date);
       }
       
-      // Add a toast notification to indicate date selection
       toast({
         title: "Date selected",
         description: `Selected ${format(date, 'PPP')}`
       });
       
-      // Log the tasks for this date to help debug
       console.log('Tasks for selected date:', getTasksForDate(date));
     }
   };
@@ -122,11 +172,7 @@ const CalendarView: React.FC = () => {
       <Button
         variant="outline"
         size="icon"
-        onClick={() => setCurrentMonth(prev => {
-          const newDate = new Date(prev);
-          newDate.setFullYear(newDate.getFullYear() - 1);
-          return startOfMonth(newDate);
-        })}
+        onClick={navigateToPreviousYear}
         title="Previous year"
       >
         <ChevronsLeft className="h-4 w-4" />
@@ -134,37 +180,29 @@ const CalendarView: React.FC = () => {
       <Button
         variant="outline"
         size="icon"
-        onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
-        title="Previous month"
+        onClick={navigateToPreviousUnit}
+        title={`Previous ${viewMode}`}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <Button
         variant="outline"
-        onClick={() => {
-          const today = new Date();
-          setCurrentMonth(today);
-          setSelectedDate(today);
-        }}
+        onClick={navigateToToday}
       >
         Today
       </Button>
       <Button
         variant="outline"
         size="icon"
-        onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
-        title="Next month"
+        onClick={navigateToNextUnit}
+        title={`Next ${viewMode}`}
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
       <Button
         variant="outline"
         size="icon"
-        onClick={() => setCurrentMonth(prev => {
-          const newDate = new Date(prev);
-          newDate.setFullYear(newDate.getFullYear() + 1);
-          return startOfMonth(newDate);
-        })}
+        onClick={navigateToNextYear}
         title="Next year"
       >
         <ChevronsRight className="h-4 w-4" />
@@ -258,7 +296,6 @@ const CalendarView: React.FC = () => {
     </div>
   );
 
-  // Function to generate a class name for days with tasks
   const getDayClassName = (date: Date) => {
     const tasks = getTasksForDate(date);
     if (tasks.length === 0) return "";
