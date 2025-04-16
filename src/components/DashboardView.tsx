@@ -80,9 +80,18 @@ const DashboardView = () => {
     }
   };
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs 
+        defaultValue="overview" 
+        value={activeTab} 
+        onValueChange={handleTabChange} 
+        className="space-y-6"
+      >
         <TabsList>
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <ChartPieIcon className="h-4 w-4" />
@@ -309,13 +318,13 @@ const DashboardView = () => {
           )}
 
           {activeTab === "analytics" && (
-            <TabsContent value="analytics" key="analytics">
+            <TabsContent value="analytics" key="analytics" forceMount>
               <DashboardAnalytics tasks={state.tasks} />
             </TabsContent>
           )}
 
           {activeTab === "progress" && (
-            <TabsContent value="progress" key="progress">
+            <TabsContent value="progress" key="progress" forceMount>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
