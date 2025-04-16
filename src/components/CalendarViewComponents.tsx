@@ -15,9 +15,15 @@ export const WeekView: React.FC<{
   const currentDate = selectedDate || new Date();
   const startDate = startOfWeek(currentDate);
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   
   // Generate array of dates for the week
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
+  
+  const handleTaskClick = (e: React.MouseEvent, taskId: string) => {
+    e.stopPropagation(); // Prevent date selection when clicking on a task
+    setExpandedTaskId(expandedTaskId === taskId ? null : taskId);
+  };
   
   return (
     <div className="grid grid-cols-7 gap-2">
@@ -63,23 +69,45 @@ export const WeekView: React.FC<{
                     whileTap={{ scale: 0.95 }}
                     onMouseEnter={() => setHoveredTaskId(task.id)}
                     onMouseLeave={() => setHoveredTaskId(null)}
+                    onClick={(e) => handleTaskClick(e, task.id)}
                     className={cn(
-                      "text-xs p-1 rounded truncate cursor-pointer",
+                      "text-xs p-1 rounded truncate cursor-pointer relative",
                       task.priority === 'high' ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" :
                       task.priority === 'medium' ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400" :
                       "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                     )}
                   >
                     {task.title}
+                    
+                    {/* Task hover info */}
                     <AnimatePresence>
-                      {hoveredTaskId === task.id && task.description && (
+                      {hoveredTaskId === task.id && task.description && expandedTaskId !== task.id && (
                         <motion.div
                           initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 5 }}
-                          className="absolute z-10 bg-white dark:bg-gray-800 p-2 rounded shadow-lg mt-1 max-w-xs"
+                          className="absolute z-10 bg-white dark:bg-gray-800 p-2 rounded shadow-lg mt-1 max-w-xs left-0 right-0"
                         >
-                          {task.description}
+                          {task.description.substring(0, 50)}{task.description.length > 50 ? '...' : ''}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    
+                    {/* Task details on click */}
+                    <AnimatePresence>
+                      {expandedTaskId === task.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="absolute z-20 bg-white dark:bg-gray-800 p-3 rounded shadow-lg mt-2 left-0 w-[200px]"
+                        >
+                          <h4 className="font-medium mb-1">{task.title}</h4>
+                          <p className="text-xs mb-2">{task.description}</p>
+                          <div className="text-xs flex items-center justify-between">
+                            <span>{format(new Date(task.dueDate || ''), 'p')}</span>
+                            <span className="font-medium">{task.priority}</span>
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -157,7 +185,7 @@ export const DayView: React.FC<{
                       >
                         <div className="font-medium">{task.title}</div>
                         <AnimatePresence>
-                          {(expandedTaskId === task.id || !task.description) && task.description && (
+                          {(expandedTaskId === task.id) && task.description && (
                             <motion.div 
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: "auto" }}
@@ -232,7 +260,7 @@ export const GridView: React.FC<{
                 </h3>
                 
                 <AnimatePresence>
-                  {(expandedTaskId === task.id || !task.description) && task.description && (
+                  {(expandedTaskId === task.id) && task.description && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
