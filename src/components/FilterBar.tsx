@@ -18,19 +18,48 @@ export interface FilterBarProps {
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   className?: string;
+  // Additional props for filter functionality
+  sortBy?: string;
+  setSortBy?: (value: string) => void;
+  sortOrder?: "asc" | "desc";
+  setSortOrder?: (value: "asc" | "desc") => void;
+  hideCompleted?: boolean;
+  setHideCompleted?: (value: boolean) => void;
+  priorityFilter?: string;
+  setPriorityFilter?: (value: string) => void;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({ 
   onAddTask, 
   searchQuery, 
   setSearchQuery,
-  className
+  className,
+  sortBy: externalSortBy,
+  setSortBy: externalSetSortBy,
+  sortOrder: externalSortOrder,
+  setSortOrder: externalSetSortOrder,
+  hideCompleted: externalHideCompleted,
+  setHideCompleted: externalSetHideCompleted,
+  priorityFilter: externalPriorityFilter,
+  setPriorityFilter: externalSetPriorityFilter
 }) => {
+  // Use external state if provided, otherwise use internal state
+  const [internalSortBy, setInternalSortBy] = useState("dueDate");
+  const [internalSortOrder, setInternalSortOrder] = useState<"asc" | "desc">("asc");
+  const [internalHideCompleted, setInternalHideCompleted] = useState(false);
+  const [internalPriorityFilter, setInternalPriorityFilter] = useState("all");
+  
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState("dueDate");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [hideCompleted, setHideCompleted] = useState(false);
-  const [priorityFilter, setPriorityFilter] = useState("all");
+
+  // Use either external or internal state
+  const sortBy = externalSortBy !== undefined ? externalSortBy : internalSortBy;
+  const setSortBy = externalSetSortBy || setInternalSortBy;
+  const sortOrder = externalSortOrder || internalSortOrder;
+  const setSortOrder = externalSetSortOrder || setInternalSortOrder;
+  const hideCompleted = externalHideCompleted !== undefined ? externalHideCompleted : internalHideCompleted;
+  const setHideCompleted = externalSetHideCompleted || setInternalHideCompleted;
+  const priorityFilter = externalPriorityFilter !== undefined ? externalPriorityFilter : internalPriorityFilter;
+  const setPriorityFilter = externalSetPriorityFilter || setInternalPriorityFilter;
 
   const handleFilterApply = () => {
     toast({
@@ -102,7 +131,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               
               <div className="flex items-center justify-between">
                 <Label>Sort direction</Label>
-                <Button variant="ghost" size="sm" onClick={handleSortDirectionToggle}>
+                <Button variant="ghost" size="sm" onClick={handleSortDirectionToggle} type="button">
                   {sortOrder === "asc" ? <ArrowDownAZ className="h-4 w-4" /> : <ArrowUpZA className="h-4 w-4" />}
                 </Button>
               </div>
@@ -133,10 +162,10 @@ const FilterBar: React.FC<FilterBarProps> = ({
               </div>
               
               <div className="flex justify-between pt-2">
-                <Button variant="outline" size="sm" onClick={handleClearFilters}>
+                <Button variant="outline" size="sm" onClick={handleClearFilters} type="button">
                   Clear
                 </Button>
-                <Button size="sm" onClick={handleFilterApply}>
+                <Button size="sm" onClick={handleFilterApply} type="button">
                   Apply Filters
                 </Button>
               </div>
@@ -148,11 +177,12 @@ const FilterBar: React.FC<FilterBarProps> = ({
           variant="outline" 
           onClick={handleSortDirectionToggle}
           className="hidden sm:flex items-center gap-2"
+          type="button"
         >
           {sortOrder === "asc" ? <ArrowDownAZ className="h-4 w-4" /> : <ArrowUpZA className="h-4 w-4" />}
         </Button>
         
-        <Button onClick={onAddTask} className="flex-1 sm:flex-none">
+        <Button onClick={onAddTask} className="flex-1 sm:flex-none" type="button">
           <Plus className="mr-2 h-4 w-4" /> Add Task
         </Button>
       </div>

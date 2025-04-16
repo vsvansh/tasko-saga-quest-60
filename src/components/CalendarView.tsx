@@ -89,6 +89,21 @@ const CalendarView: React.FC = () => {
     setTaskDetailId(taskId === taskDetailId ? null : taskId);
   };
 
+  const handleDateChange = (date: Date | undefined) => {
+    // Fix date selection
+    if (date) {
+      setSelectedDate(date);
+      // Also update the current month if the selected date is in a different month
+      if (!isSameMonth(date, currentMonth)) {
+        setCurrentMonth(date);
+      }
+    }
+  };
+
+  const handleMonthChange = (newMonth: Date) => {
+    setCurrentMonth(newMonth);
+  };
+
   const navigationButtons = (
     <div className="flex flex-wrap items-center gap-2 mb-4">
       <Button
@@ -261,22 +276,15 @@ const CalendarView: React.FC = () => {
                 <CalendarComponent
                   mode="single"
                   selected={selectedDate}
-                  onSelect={setSelectedDate}
+                  onSelect={handleDateChange}
                   className="mx-auto pointer-events-auto"
                   month={currentMonth}
+                  onMonthChange={handleMonthChange}
                   modifiersClassNames={{
                     selected: "bg-primary text-primary-foreground",
                   }}
-                  modifiers={{
-                    taskDay: (date) => getTasksForDate(date).length > 0
-                  }}
-                  modifiersStyles={{
-                    taskDay: {
-                      fontWeight: "bold"
-                    }
-                  }}
                   components={{
-                    DayContent: ({ date, ...props }) => {
+                    DayContent: ({ date }) => {
                       const tasks = getTasksForDate(date);
                       const className = getDayClassName(date);
                       
@@ -286,7 +294,6 @@ const CalendarView: React.FC = () => {
                             "relative h-9 w-9 flex items-center justify-center",
                             className
                           )}
-                          {...props}
                         >
                           {date.getDate()}
                           {tasks.length > 0 && (
@@ -308,9 +315,9 @@ const CalendarView: React.FC = () => {
                   {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
+              <CardContent className="p-4 overflow-auto max-h-[calc(100vh-250px)]">
                 {displayMode === 'list' ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {tasksForSelectedDate.length > 0 ? tasksForSelectedDate.map(task => (
                       <motion.div 
                         key={task.id}
@@ -320,16 +327,15 @@ const CalendarView: React.FC = () => {
                         exit={{ opacity: 0, y: -10 }}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.2 }}
                         onClick={() => handleTaskClick(task.id)}
                         className={cn(
-                          "p-3 rounded-md border cursor-pointer",
+                          "p-4 rounded-md border cursor-pointer",
                           task.completed ? "bg-gray-50 dark:bg-gray-800/50" : "bg-white dark:bg-gray-800"
                         )}
                       >
                         <div className="flex items-start justify-between">
-                          <div className={cn(task.completed && "line-through text-muted-foreground")}>
-                            <h3 className="font-medium">{task.title}</h3>
+                          <div className={cn("flex-1", task.completed && "line-through text-muted-foreground")}>
+                            <h3 className="font-medium mb-2">{task.title}</h3>
                             
                             <AnimatePresence>
                               {taskDetailId === task.id && task.description && (
@@ -353,7 +359,7 @@ const CalendarView: React.FC = () => {
                           <Badge 
                             variant="outline" 
                             className={cn(
-                              "ml-2",
+                              "ml-2 whitespace-nowrap",
                               getPriorityColor(task.priority).replace('text-', 'bg-').replace('anime-', '') + "/20",
                               getPriorityColor(task.priority)
                             )}
