@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTodo } from '@/context/TodoContext';
 import Sidebar from '@/components/Sidebar';
@@ -169,7 +168,6 @@ const Index: React.FC<IndexProps> = ({
         <div className="max-w-5xl mx-auto pt-16 lg:pt-6 pb-20">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center">
-              
               <h1 className="text-2xl md:text-3xl font-bold hidden md:block gradient-text">Anime Task Manager</h1>
             </div>
             <Profile userName="Anime Fan" />
@@ -179,20 +177,20 @@ const Index: React.FC<IndexProps> = ({
           
           <div className="mb-6">
             <Tabs defaultValue={state.view} onValueChange={handleViewChange} value={state.view} className="space-y-6">
-              <TabsList className="w-full gap-1 p-1 h-12 bg-muted/80 flex flex-wrap justify-center sm:flex-nowrap">
-                <TabsTrigger value="list" className="flex-1 h-10 min-w-[80px]">
+              <TabsList className="w-full gap-1 p-1 h-auto bg-muted/80 flex flex-wrap justify-center sm:flex-nowrap">
+                <TabsTrigger value="list" className="flex-1 h-10 min-w-[70px]">
                   <List className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">List View</span>
+                  <span className="hidden sm:inline">List</span>
                 </TabsTrigger>
-                <TabsTrigger value="calendar" className="flex-1 h-10 min-w-[80px]">
+                <TabsTrigger value="calendar" className="flex-1 h-10 min-w-[70px]">
                   <CalendarDays className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">Calendar</span>
                 </TabsTrigger>
-                <TabsTrigger value="dashboard" className="flex-1 h-10 min-w-[80px]">
+                <TabsTrigger value="dashboard" className="flex-1 h-10 min-w-[70px]">
                   <LayoutDashboard className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">Dashboard</span>
                 </TabsTrigger>
-                <TabsTrigger value="starred" className="flex-1 h-10 min-w-[80px]">
+                <TabsTrigger value="starred" className="flex-1 h-10 min-w-[70px]">
                   <Star className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">Starred</span>
                 </TabsTrigger>
