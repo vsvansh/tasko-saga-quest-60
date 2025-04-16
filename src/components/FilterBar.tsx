@@ -35,7 +35,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
   const handleFilterApply = () => {
     toast({
       title: "Filters applied",
-      description: `Sorted by ${sortBy}, ${hideCompleted ? "hiding" : "showing"} completed tasks`,
+      description: `Sorted by ${sortBy}, ${hideCompleted ? "hiding" : "showing"} completed tasks, priority: ${priorityFilter}`,
     });
     setShowFilters(false);
   };
@@ -80,7 +80,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               <span className="hidden sm:inline">Filters</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-72 p-4" align="end">
+          <PopoverContent className="w-72 p-4 pointer-events-auto" align="end">
             <div className="space-y-4">
               <h4 className="font-medium">Filter & Sort</h4>
               <Separator />
@@ -91,7 +91,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                   <SelectTrigger>
                     <SelectValue placeholder="Select field" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="pointer-events-auto">
                     <SelectItem value="dueDate">Due Date</SelectItem>
                     <SelectItem value="title">Title</SelectItem>
                     <SelectItem value="priority">Priority</SelectItem>
@@ -115,7 +115,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                   <SelectTrigger>
                     <SelectValue placeholder="Filter priority" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="pointer-events-auto">
                     <SelectItem value="all">All Priorities</SelectItem>
                     <SelectItem value="high">High</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>

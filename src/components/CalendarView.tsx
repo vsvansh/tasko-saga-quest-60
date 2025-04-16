@@ -20,6 +20,7 @@ import { toast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/ThemeProvider';
 import { WeekView, DayView, GridView } from './CalendarViewComponents';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CalendarView: React.FC = () => {
   const { state } = useTodo();
@@ -33,6 +34,7 @@ const CalendarView: React.FC = () => {
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
   const [showWeekends, setShowWeekends] = useState(true);
+  const [taskDetailId, setTaskDetailId] = useState<string | null>(null);
   
   // Function to get tasks for a specific date
   const getTasksForDate = (date: Date): Task[] => {
@@ -82,12 +84,21 @@ const CalendarView: React.FC = () => {
     setShowSettingsDialog(false);
   };
 
+  // Handle task click for animation and details
+  const handleTaskClick = (taskId: string) => {
+    setTaskDetailId(taskId === taskDetailId ? null : taskId);
+  };
+
   const navigationButtons = (
     <div className="flex flex-wrap items-center gap-2 mb-4">
       <Button
         variant="outline"
         size="icon"
-        onClick={() => setCurrentMonth(prev => startOfMonth(subMonths(prev, 12)))}
+        onClick={() => setCurrentMonth(prev => {
+          const newDate = new Date(prev);
+          newDate.setFullYear(newDate.getFullYear() - 1);
+          return startOfMonth(newDate);
+        })}
         title="Previous year"
       >
         <ChevronsLeft className="h-4 w-4" />
@@ -102,7 +113,11 @@ const CalendarView: React.FC = () => {
       </Button>
       <Button
         variant="outline"
-        onClick={() => setCurrentMonth(new Date())}
+        onClick={() => {
+          const today = new Date();
+          setCurrentMonth(today);
+          setSelectedDate(today);
+        }}
       >
         Today
       </Button>
@@ -117,7 +132,11 @@ const CalendarView: React.FC = () => {
       <Button
         variant="outline"
         size="icon"
-        onClick={() => setCurrentMonth(prev => startOfMonth(addMonths(prev, 12)))}
+        onClick={() => setCurrentMonth(prev => {
+          const newDate = new Date(prev);
+          newDate.setFullYear(newDate.getFullYear() + 1);
+          return startOfMonth(newDate);
+        })}
         title="Next year"
       >
         <ChevronsRight className="h-4 w-4" />
@@ -130,7 +149,7 @@ const CalendarView: React.FC = () => {
             Jump to Date
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80">
+        <PopoverContent className="w-80 pointer-events-auto">
           <div className="flex flex-col gap-2">
             <Input
               type="date"
@@ -192,7 +211,7 @@ const CalendarView: React.FC = () => {
               <Settings className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="pointer-events-auto">
             <DropdownMenuItem onClick={() => handleAppearanceChange('light')}>
               <Sun className="h-4 w-4 mr-2" />
               Light
@@ -293,18 +312,42 @@ const CalendarView: React.FC = () => {
                 {displayMode === 'list' ? (
                   <div className="space-y-3">
                     {tasksForSelectedDate.length > 0 ? tasksForSelectedDate.map(task => (
-                      <div 
-                        key={task.id} 
+                      <motion.div 
+                        key={task.id}
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => handleTaskClick(task.id)}
                         className={cn(
-                          "p-3 rounded-md border",
+                          "p-3 rounded-md border cursor-pointer",
                           task.completed ? "bg-gray-50 dark:bg-gray-800/50" : "bg-white dark:bg-gray-800"
                         )}
                       >
                         <div className="flex items-start justify-between">
                           <div className={cn(task.completed && "line-through text-muted-foreground")}>
                             <h3 className="font-medium">{task.title}</h3>
-                            {task.description && (
-                              <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                            
+                            <AnimatePresence>
+                              {taskDetailId === task.id && task.description && (
+                                <motion.p 
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="text-sm text-muted-foreground mt-1"
+                                >
+                                  {task.description}
+                                </motion.p>
+                              )}
+                            </AnimatePresence>
+                            
+                            {taskDetailId !== task.id && task.description && (
+                              <p className="text-xs text-muted-foreground mt-1 truncate">
+                                {task.description.substring(0, 50)}{task.description.length > 50 ? '...' : ''}
+                              </p>
                             )}
                           </div>
                           <Badge 
@@ -318,7 +361,7 @@ const CalendarView: React.FC = () => {
                             {task.priority}
                           </Badge>
                         </div>
-                      </div>
+                      </motion.div>
                     )) : (
                       <div className="text-center py-8 text-muted-foreground">
                         <p>No tasks scheduled for this date</p>
